@@ -14,7 +14,7 @@ namespace rm_tools
 class ExtendedKalmanFilter
 {
 public:
-  Eigen::VectorXd x;
+  Eigen::VectorXd X;
   Eigen::MatrixXd P;
 
   ExtendedKalmanFilter() = default;

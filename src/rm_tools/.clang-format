@@ -2,7 +2,19 @@
 Language: Cpp
 BasedOnStyle: Google
 
-AccessModifierOffset: -2
+AccessModifierOffset: -2  # 访问修饰符缩进 - 相当于0.5缩进
+IndentWidth: 4  # 基础缩进宽度
+TabWidth: 4  # 制表符宽度
+ContinuationIndentWidth: 4  # 续行缩进宽度
+MaxEmptyLinesToKeep: 3  # 保留的最大空行数
+ColumnLimit: 110  # 列宽限制
+ConstructorInitializerIndentWidth: 4  # 构造函数初始化列表缩进宽度
+
+# AccessModifierOffset: -2
+# IndentWidth: 2
+# ColumnLimit: 100
+# ConstructorInitializerIndentWidth: 0
+# ContinuationIndentWidth: 2
 AlignAfterOpenBracket: AlwaysBreak
 BraceWrapping:
   AfterClass: true
@@ -10,9 +22,6 @@ BraceWrapping:
   AfterNamespace: true
   AfterStruct: true
 BreakBeforeBraces: Custom
-ColumnLimit: 100
-ConstructorInitializerIndentWidth: 0
-ContinuationIndentWidth: 2
 DerivePointerAlignment: false
 PointerAlignment: Middle
 ReflowComments: false

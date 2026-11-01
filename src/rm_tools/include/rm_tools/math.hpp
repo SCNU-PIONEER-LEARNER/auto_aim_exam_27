@@ -34,7 +34,8 @@ Eigen::Matrix3d rotation_matrix(const Eigen::Vector3d & ypr);
 Eigen::Vector3d xyz2ypd(const Eigen::Vector3d & xyz);
 
 // 直角坐标系转球坐标系转换函数对xyz的雅可比矩阵
-Eigen::MatrixXd xyz2ypd_jacobian(const Eigen::Vector3d & xyz);
+// 当输入接近原点时返回零矩阵，避免除零
+Eigen::Matrix3d xyz2ypd_jacobian(const Eigen::Vector3d & xyz);
 
 // 球坐标系转直角坐标系
 Eigen::Vector3d ypd2xyz(const Eigen::Vector3d & ypd);
@@ -152,6 +153,15 @@ Eigen::Quaterniond quaterniond(const cv::Mat & R);
  */
 Eigen::Vector3d eulers(cv::Mat R, int axis0, int axis1, int axis2, bool extrinsic = false);
 
+/**
+ * @brief sqrt(x^2 + y^2)
+ */
+inline double hypot(double x, double y) { return sqrt(x * x + y * y); }
+
 }  // namespace rm_tools
+
+/// @brief 返回输入值的平方
+template <typename T>
+inline constexpr T sq(const T x) { return x * x;}
 
 #endif  // TOOLS__MATH_TOOLS_HPP

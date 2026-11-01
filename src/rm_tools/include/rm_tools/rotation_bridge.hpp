@@ -1,12 +1,25 @@
+#pragma once
+
 #include <Eigen/Geometry>
+#include <geometry_msgs/msg/detail/pose__struct.hpp>
+#include <geometry_msgs/msg/detail/transform__struct.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/eigen.hpp>  // 放在Eigen后面
+#include <opencv2/core/types.hpp>
+#include <rosidl_runtime_cpp/message_initialization.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #ifndef CV_PI
 #define CV_PI 3.1415926535897932384626433832795
 #endif
+
+// enum Axis_i {
+//     X = 0,
+//     Y = 2,
+//     Z = 4
+// };
+
 
 // using namespace rm_tools::tf; 是安全的
 // 当然更推荐 using rm_tools::tf::rot_bridge;
@@ -59,11 +72,11 @@ class rot_bridge {
         /**
          * @brief 支持很多种构造方法，比如四元数，旋转矩阵，旋转向量，欧拉角等
          * 
-         * @param eulers  欧拉角（以3维向量形式）
+         * @param eulers  欧拉角（以3维向量形式）（弧度制）
          * @param axis  x=0, y=1, z=2
-         * @param extrinsic  是否启用外旋组合
+         * @param extrinsic  是否启用外旋组合，默认与ROS/OpenCV保持一致使用外旋
          */
-        rot_bridge(const Eigen::Vector3d eulers, int axis0, int axis1, int axis2, bool extrinsic = false);
+        rot_bridge(const Eigen::Vector3d eulers, int axis0, int axis1, int axis2, bool extrinsic = true);
 
         // ------------------输出结果-------------------------
         
@@ -102,23 +115,27 @@ class rot_bridge {
          */
         cv::Mat rvec() const noexcept;
 
-        /**
-         * @brief 输出欧拉角
-         * @param axis  x=0, y=1, z=2
-         * @param extrinsic  是否启用外旋组合
-         * 
-         * 参考：rm_tools/math.hpp
-         */
-        Eigen::Vector3d eulers(int axis0, int axis1, int axis2, bool extrinsic = false);
+        // todo: axis用枚举
 
         /**
-         * @brief 输出欧拉角(角度版)
+         * @brief 输出欧拉角（但只有主解）
          * @param axis  x=0, y=1, z=2
-         * @param extrinsic  是否启用外旋组合
+         * @param extrinsic  是否启用外旋组合，默认与ROS/OpenCV保持一致使用外旋
+         * 
+         * 参考：rm_tools/math.hpp
+         * 
+         * @note 如果需要角度而不是弧度的话，可以在函数名后加后缀`_degree`，而不必手动 `* 180.0 / CV_PI`
+         */
+        Eigen::Vector3d eulers(int axis0, int axis1, int axis2, bool extrinsic = true);
+
+        /**
+         * @brief 输出欧拉角(角度版)（但只有主解）
+         * @param axis  x=0, y=1, z=2
+         * @param extrinsic  是否启用外旋组合，默认与ROS/OpenCV保持一致使用外旋
          * 
          * 参考：rm_tools/math.hpp
          */
-        Eigen::Vector3d eulers_degree(int axis0, int axis1, int axis2, bool extrinsic = false)
+        Eigen::Vector3d eulers_degree(int axis0, int axis1, int axis2, bool extrinsic = true)
             { return (this->eulers(axis0, axis1, axis2, extrinsic) * (180.0 / CV_PI)); };
         
     // 工具函数
@@ -132,23 +149,79 @@ class rot_bridge {
         Eigen::Vector3d getAxisVector(int axis)
         {
           switch (axis) {
-            case 0:
-              return Eigen::Vector3d::UnitX();  // x-axis
-            case 1:
-              return Eigen::Vector3d::UnitY();  // y-axis
-            case 2:
-              return Eigen::Vector3d::UnitZ();  // z-axis
-            default:
-              throw std::invalid_argument("Invalid axis index: must be 0 (x), 1 (y), or 2 (z)");
+              case 0:
+                  return Eigen::Vector3d::UnitX();  // x-axis
+              case 1:
+                  return Eigen::Vector3d::UnitY();  // y-axis
+              case 2:
+                  return Eigen::Vector3d::UnitZ();  // z-axis
+              default:
+                  throw std::invalid_argument("Invalid axis index: must be 0 (x), 1 (y), or 2 (z)");
           }
         }
 };
 
+
+/// @brief 坐标转换类，支持geometry_msg, Eigen, tf2等坐标信息的转换, 用法类似RotBridge
+/// (未来计划支持opencv的tvec，或者哪个好心人帮我写一下？)
+template <typename T>
+class PositionBridge {
+public:
+    PositionBridge(const geometry_msgs::msg::Pose::_position_type & _pos) : x_(_pos.x), y_(_pos.y), z_(_pos.z) {}
+    PositionBridge(const Eigen::Vector3d & _pos) : x_(_pos.x()), y_(_pos.y()), z_(_pos.z()) {}
+    PositionBridge(const geometry_msgs::msg::Transform::_translation_type & _pos) : x_(_pos.x), y_(_pos.y), z_(_pos.z) {}
+
+    inline geometry_msgs::msg::Pose::_position_type toGeometry() const;
+    inline Eigen::Vector3d toEigen() const {return Eigen::Vector3d(x_, y_, z_);}
+    inline geometry_msgs::msg::Transform::_translation_type toTranslasion() const;
+    inline cv::Point3d toCVpoint3d() const {return cv::Point3d{x_, y_, z_};}
+    inline cv::Point3f toCVpoint3f() const {return cv::Point3f(x_, y_, z_);}
+    // inline tf2::TransformStamped
+private:
+    const T x_;
+    const T y_;
+    const T z_;
+};
 
 }  // namespace rm_tools
 
 namespace rm_tools
 {
     bool is_valid_rotation_matrix(const cv::Mat & R);
+
+    /**
+     * @brief 四元数转欧拉角，范围：[-pi, pi]
+     */
+    inline double orientationToYaw(const geometry_msgs::msg::Quaternion & g_q)
+    {
+        Eigen::Quaterniond q(g_q.w, g_q.x, g_q.y, g_q.z);
+        q.normalize();
+        double yaw =
+            std::atan2(2.0 * (q.w() * q.z() + q.x() * q.y()), 1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z()));
+        return yaw;
+    }
 } // namespace rm_tools
+
+
+// ================= inline definations ===============
+
+template <typename T>
+inline geometry_msgs::msg::Pose::_position_type rm_tools::tf::PositionBridge<T>::toGeometry() const
+{
+    geometry_msgs::msg::Pose::_position_type pos (rosidl_runtime_cpp::MessageInitialization::SKIP);
+    pos.x = x_;
+    pos.y = y_;
+    pos.z = z_;
+    return pos;
+}
+
+template <typename T>
+inline geometry_msgs::msg::Transform::_translation_type rm_tools::tf::PositionBridge<T>::toTranslasion() const
+{
+    geometry_msgs::msg::Transform::_translation_type pos(rosidl_runtime_cpp::MessageInitialization::SKIP);
+    pos.x = x_;
+    pos.y = y_;
+    pos.z = z_;
+    return pos;
+}
 

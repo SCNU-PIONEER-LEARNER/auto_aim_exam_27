@@ -17,18 +17,17 @@
 #endif  // ENABLE_CHI_SQUARE_TEST__
 
 
-// rm_planner.cpp的pitch轴mpc求解器，太多辣标不出来
-// 改了这个还要重新编译rm_planner包
-#ifndef ENABLE_PITCH_TINY_MPC_SOLVER__
-#define ENABLE_PITCH_TINY_MPC_SOLVER__ false
-#else
-    #error "ENABLE_PITCH_TINY_MPC_SOLVER__ 宏被占用"
-#endif  // ENABLE_PITCH_TINY_MPC_SOLVER__
-
 // 检测模式，0单线程，1异步推理，2线程池，3传统视觉
 // 改了这个要重新编译armor_detector，做这个主要是可以减少编译时间
 #ifndef DETECT_MODE__
-#define DETECT_MODE__  3
+#define DETECT_MODE__  0
 #else
     #error "DETECT_MODE__ 宏被占用"
 #endif  // DETECT_MODE__
+
+// 为true时去掉DETECT_MODE__宏的代码裁减
+#ifndef REMOVE_DETECT_MODE
+#define REMOVE_DETECT_MODE true
+#else
+    #error "REMOVE_DETECT_MODE宏被占用"
+#endif // REMOVE_DETECT_MODE

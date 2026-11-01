@@ -111,30 +111,31 @@ Eigen::Vector3d xyz2ypd(const Eigen::Vector3d & xyz)
   return {yaw, pitch, distance};
 }
 
-Eigen::MatrixXd xyz2ypd_jacobian(const Eigen::Vector3d & xyz)
+Eigen::Matrix3d xyz2ypd_jacobian(const Eigen::Vector3d & xyz)
 {
-  auto x = xyz[0], y = xyz[1], z = xyz[2];
+  const double x = xyz[0];
+  const double y = xyz[1];
+  const double z = xyz[2];
+  const double xy2 = x * x + y * y;
+  const double xy = std::sqrt(xy2);
+  const double d2 = xy2 + z * z;
+  const double d = std::sqrt(d2);
 
-  auto dyaw_dx = -y / (x * x + y * y);
-  auto dyaw_dy = x / (x * x + y * y);
-  auto dyaw_dz = 0.0;
+  Eigen::Matrix3d J = Eigen::Matrix3d::Zero();
+  if (xy2 <= 1e-12 || d2 <= 1e-12) {
+    return J;
+  }
 
-  auto dpitch_dx = -(x * z) / ((z * z / (x * x + y * y) + 1) * std::pow((x * x + y * y), 1.5));
-  auto dpitch_dy = -(y * z) / ((z * z / (x * x + y * y) + 1) * std::pow((x * x + y * y), 1.5));
-  auto dpitch_dz = 1 / ((z * z / (x * x + y * y) + 1) * std::pow((x * x + y * y), 0.5));
+  J(0, 0) = -y / xy2;
+  J(0, 1) = x / xy2;
 
-  auto ddistance_dx = x / std::pow((x * x + y * y + z * z), 0.5);
-  auto ddistance_dy = y / std::pow((x * x + y * y + z * z), 0.5);
-  auto ddistance_dz = z / std::pow((x * x + y * y + z * z), 0.5);
+  J(1, 0) = -(x * z) / (d2 * xy);
+  J(1, 1) = -(y * z) / (d2 * xy);
+  J(1, 2) = xy / d2;
 
-  // clang-format off
-  Eigen::MatrixXd J{
-    {dyaw_dx, dyaw_dy, dyaw_dz},
-    {dpitch_dx, dpitch_dy, dpitch_dz},
-    {ddistance_dx, ddistance_dy, ddistance_dz}
-  };
-  // clang-format on
-
+  J(2, 0) = x / d;
+  J(2, 1) = y / d;
+  J(2, 2) = z / d;
   return J;
 }
 
