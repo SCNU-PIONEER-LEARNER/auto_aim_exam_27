@@ -1,0 +1,15 @@
+CompileFlags:
+  Add:
+    - -std=c++20
+    - -I./include
+
+InlayHints:
+  ParameterNames: false
+  DeducedTypes: false
+
+---
+
+Diagnostics:
+  Includes:
+    IgnoreHeader:
+      - .*rm_interfaces/msg/.*\.hpp
