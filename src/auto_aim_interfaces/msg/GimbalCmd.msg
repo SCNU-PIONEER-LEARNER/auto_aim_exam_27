@@ -1,0 +1,11 @@
+std_msgs/Header header
+bool control
+bool fire
+float64 target_yaw
+float64 target_pitch
+float64 yaw
+float64 yaw_vel
+float64 yaw_acc
+float64 pitch
+float64 pitch_vel
+float64 pitch_acc
