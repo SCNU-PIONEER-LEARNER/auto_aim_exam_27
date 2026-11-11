@@ -1,0 +1,49 @@
+/**/serial_driver:
+  ros__parameters:
+    timestamp_offset: 0.006
+    is_open_fire_control: true
+    device_name: /dev/ttyACM0
+    baud_rate: 115200
+    flow_control: none
+    parity: none
+    stop_bits: "1"
+
+/**/virtual_serial:
+  ros__parameters:
+    task_mode: "aim"  #aim small_buff large_buff
+    detect_color: 0
+    is_play: false
+    virtual_roll: 0.0
+    virtual_yaw: 0.0
+    virtual_pitch: 0.0
+    bullet_speed: 22.0
+
+
+/**/rm_tracker:
+  ros__parameters:
+    target_frame: odom
+    max_armor_distance: 15.0
+    yaw_threshold: 45
+    outpost_preset_vyaw: true   #! expermental
+
+    ekf:
+      sigma2_q_xyz: 100.0
+      sigma2_q_yaw_max: 400.0
+      sigma2_q_yaw_min: 20.0
+
+      r_py: 4e-3      #8mm 2e-3 6mm 4e-3 maybe可以再测测
+      r_d: 1.0
+      r_yaw: 9e-2 #默认为两米处的
+
+    tracker:
+      max_match_distance: 0.5
+      max_match_yaw_diff: 0.8
+      max_match_angle_diff: 2.0
+      mahalanobis_gate: 9.49
+      # matching_method: "mahalanobis"  # mahalanobis or entropy
+      high_q_vyaw_correction_accel: 20.0
+      tracking_thres: 5
+      lost_time_thres: 1.0
+
+      irregular_ids: [""]
+

@@ -1,0 +1,27 @@
+#ca016 6mm镜头
+image_width: 1440
+image_height: 1080
+camera_name: narrow_stereo
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1808.63885,    0.     ,  736.76199,
+            0.     , 1806.88425,  569.72947,
+            0.     ,    0.     ,    1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.060615, -0.010496, -0.001570, -0.000612, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1789.26428,    0.     ,  736.06028,    0.     ,
+            0.     , 1795.37244,  568.76746,    0.     ,
+            0.     ,    0.     ,    1.     ,    0.     ]

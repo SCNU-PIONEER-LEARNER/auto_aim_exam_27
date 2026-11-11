@@ -1,0 +1,19 @@
+camera: hik
+
+odom2camera:
+  xyz: "\"0.0886 0.0 0.052\""
+  rpy: "\"0 0.0 0.0\""
+  pitch_to_odom_distance: 0.0
+
+namespace: ''
+detector_log_level: INFO
+armor_tracker_log_level: INFO
+planner_log_level: INFO
+buff_detector_log_level: INFO
+buff_tracker_log_level: INFO
+serial_log_level: INFO
+auto_record_log_level: INFO
+calibrator_log_level: INFO
+
+# true: 虚拟下位机 false: 实车 
+virtual_serial: false
