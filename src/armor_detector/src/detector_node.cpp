@@ -684,9 +684,9 @@ void ArmorDetectorNode::cv_process(const cv::Mat & img, int64_t t)
 
 void ArmorDetectorNode::initDetector()
 {
-  auto pkg_path = ament_index_cpp::get_package_share_directory("pinyvision_models");
+  auto pkg_path = ament_index_cpp::get_package_share_directory("armor_detector");
   std::string model_name = this->declare_parameter("model_name", "yolov5.xml");
-  auto model_path = pkg_path + "/models/armor/" + model_name;
+  auto model_path = pkg_path + "/models/" + model_name;
   std::string device = declare_parameter("device", "CPU");
   auto conf_threshold = this->declare_parameter("confidence_threshole", 0.5);
   yolo_ = nullptr;
@@ -713,9 +713,9 @@ void ArmorDetectorNode::initDetector()
 
 void ArmorDetectorNode::init_pool()
 {
-  auto pkg_path = ament_index_cpp::get_package_share_directory("pinyvision_models");
+  auto pkg_path = ament_index_cpp::get_package_share_directory("armor_detector");
   std::string model_name = this->declare_parameter("model_name", "yolov5.xml");
-  auto model_path = pkg_path + "/models/armor/" + model_name;
+  auto model_path = pkg_path + "/models/" + model_name;
   std::string device = this->declare_parameter("device", "CPU");
   num_yolo_thread = this->declare_parameter("num_yolo_thread", 8);
   int max_yolo_queue_size = this->declare_parameter("max_yolo_queue_size", num_yolo_thread);
@@ -773,8 +773,8 @@ std::unique_ptr<cv_Detector> ArmorDetectorNode::make_cv_Detector()
   // std::string model_name = this->declare_parameter("model_name", "yolov5.xml"); // 栈变量自动销毁
   // Init classifier
   auto pkg_path = ament_index_cpp::get_package_share_directory("pinyvision_models");
-  auto model_path = pkg_path + "/models/armor/mlp.onnx";
-  auto label_path = pkg_path + "/models/armor/label.txt";
+  auto model_path = pkg_path + "/models/mlp.onnx";
+  auto label_path = pkg_path + "/models/label.txt";
   RCLCPP_INFO(this->get_logger(),(std::string("model_path = ") + model_path).c_str());
   double threshold = this->declare_parameter("classifier_threshold", 0.7);
   std::vector<std::string> ignore_classes =
